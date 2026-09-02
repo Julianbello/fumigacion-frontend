@@ -1,5 +1,10 @@
 ﻿const API_BASE = window.API_BASE_URL || "http://localhost:4000/api";
 
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+}
+
 async function login(username, password) {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
@@ -10,12 +15,24 @@ async function login(username, password) {
   return res.json();
 }
 
-async function registrarFumigacion(token, payload) {
+async function registrarFumigacion(payload) {
   const res = await fetch(`${API_BASE}/fumigaciones`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: authHeaders(),
     body: JSON.stringify(payload)
   });
   if (!res.ok) throw new Error((await res.json()).error);
+  return res.json();
+}
+
+async function obtenerFumigaciones() {
+  const res = await fetch(`${API_BASE}/fumigaciones`, { headers: authHeaders() });
+  if (!res.ok) throw new Error("No se pudo cargar el historial");
+  return res.json();
+}
+
+async function obtenerInventario() {
+  const res = await fetch(`${API_BASE}/fumigaciones/inventario`, { headers: authHeaders() });
+  if (!res.ok) throw new Error("No se pudo cargar el inventario");
   return res.json();
 }

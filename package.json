@@ -1,5 +1,5 @@
 {
-  "name": "fumigacion-backend",
+  "name": "fumigacion-frontend",
   "version": "1.0.0",
   "scripts": {
     "start": "node src/server.js",

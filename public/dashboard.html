@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard — Control de Fumigación</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><span class="icon">🐛</span> Fumigación</div>
+      <nav>
+        <a href="dashboard.html">📊 Dashboard</a>
+        <a href="fumigacion.html">🧪 Registrar Fumigación</a>
+        <a href="inventario.html">📦 Inventario</a>
+        <a href="historial.html">🗒️ Historial</a>
+      </nav>
+    </aside>
+    <div class="main-area">
+      <header class="topbar">
+        <h1>Dashboard</h1>
+        <div class="user-box">
+          <span id="topbarUserName">Cargando...</span>
+          <div class="avatar" id="topbarUserInitial">?</div>
+          <button class="btn-logout" id="logoutBtn">Salir</button>
+        </div>
+      </header>
+      <main class="content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div><div class="label">Fumigaciones registradas</div><div class="value" id="statFumigaciones">—</div></div>
+            <div class="stat-icon">🧪</div>
+          </div>
+          <div class="stat-card">
+            <div><div class="label">Productos en catálogo</div><div class="value" id="statProductos">—</div></div>
+            <div class="stat-icon">📦</div>
+          </div>
+          <div class="stat-card">
+            <div><div class="label">Productos con stock bajo (&lt; 5 L)</div><div class="value" id="statStockBajo">—</div></div>
+            <div class="stat-icon warning">⚠️</div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Últimas fumigaciones registradas</h2>
+          <table class="data-table">
+            <thead><tr><th>Fecha</th><th>Producto</th><th>Categoría</th><th>Litros aplicados</th><th>Responsable</th></tr></thead>
+            <tbody id="tablaUltimas"><tr><td colspan="5">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
