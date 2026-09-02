@@ -1,16 +1,22 @@
 ﻿document.getElementById("fumigacionForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const token = localStorage.getItem("token");
+  const resultado = document.getElementById("resultado");
+  resultado.className = "mensaje";
+
   const payload = {
     productoId: Number(document.getElementById("productoId").value),
     litrosAplicados: Number(document.getElementById("litros").value),
     categoria: document.getElementById("categoria").value
   };
+
   try {
-    const registro = await registrarFumigacion(token, payload);
-    document.getElementById("resultado").textContent =
-      `Registrada. Stock restante de ${registro.productoNombre}: ${registro.stockRestante} L`;
+    const registro = await registrarFumigacion(payload);
+    resultado.classList.add("exito");
+    resultado.textContent =
+      `Registrada correctamente. Stock restante de ${registro.productoNombre}: ${registro.stockRestante} L`;
+    document.getElementById("fumigacionForm").reset();
   } catch (err) {
-    document.getElementById("resultado").textContent = `Error: ${err.message}`;
+    resultado.classList.add("error");
+    resultado.textContent = `Error: ${err.message}`;
   }
 });
