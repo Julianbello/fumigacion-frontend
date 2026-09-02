@@ -1,4 +1,4 @@
-﻿const API_BASE = window.API_BASE_URL || "http://localhost:4000/api";
+﻿const API_BASE = window.API_BASE_URL || "https://fumigacion-backend-bien.vercel.app/api";
 
 function authHeaders() {
   const token = localStorage.getItem("token");
