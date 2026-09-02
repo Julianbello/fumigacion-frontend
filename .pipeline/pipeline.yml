@@ -45,7 +45,7 @@ unit_tests:
   image: node:${NODE_VERSION}
   script:
     - npm test -- --ci --coverage
-  coverage: "/Lines\s*:\s*(\d+\.?\d*)%/"
+  coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
   artifacts:
     reports:
       junit: junit.xml
@@ -93,3 +93,4 @@ deploy_prod:
   rules:
     - if: "$CI_COMMIT_BRANCH == \"main\""
   needs: ["deploy_qa"]
+
