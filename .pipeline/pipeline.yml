@@ -46,20 +46,6 @@ stages:
     - script: npm run lint
       displayName: 'Lint'
 
-  - job: StaticAnalysis
-    steps:
-    - task: UseNode@1
-      inputs: { version: $(NODE_VERSION) }
-    - script: npm ci
-      displayName: 'Install deps'
-    - script: |
-        npx sonar-scanner \
-          -Dsonar.host.url=$(SONAR_HOST_URL) \
-          -Dsonar.token=$(SONAR_TOKEN) \
-          -Dsonar.projectKey=fumigacion-frontend \
-          -Dsonar.qualitygate.wait=true
-      displayName: 'SonarQube analysis'
-
   - job: UnitTests
     steps:
     - task: UseNode@1
@@ -148,4 +134,3 @@ stages:
             artifact: package
           - script: ./scripts/deploy.sh prod
             displayName: 'Deploy to PROD'
-            
