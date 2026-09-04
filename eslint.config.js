@@ -6,13 +6,17 @@ module.exports = [
     files: ["src/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
-      sourceType: "module",
+      sourceType: "commonjs",
       globals: {
-        window: "readonly",
-        document: "readonly",
-        console: "readonly",
-        process: "readonly"
+        require: "readonly",
+        module: "readonly",
+        exports: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        process: "readonly",
+        console: "readonly"
       }
     }
   }
 ];
+
