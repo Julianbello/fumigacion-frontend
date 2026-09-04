@@ -31,8 +31,6 @@ stages:
         npm ci
         npm run build
       displayName: 'npm ci && build'
-    - publish: node_modules
-      artifact: node_modules
 
 # ---------- QUALITY GATES ----------
 - stage: QualityGates
@@ -43,8 +41,8 @@ stages:
     steps:
     - task: UseNode@1
       inputs: { version: $(NODE_VERSION) }
-    - download: current
-      artifact: node_modules
+    - script: npm ci
+      displayName: 'Install deps'
     - script: npm run lint
       displayName: 'Lint'
 
@@ -52,8 +50,8 @@ stages:
     steps:
     - task: UseNode@1
       inputs: { version: $(NODE_VERSION) }
-    - download: current
-      artifact: node_modules
+    - script: npm ci
+      displayName: 'Install deps'
     - script: |
         npx sonar-scanner \
           -Dsonar.projectKey=fumigacion-frontend \
@@ -64,8 +62,8 @@ stages:
     steps:
     - task: UseNode@1
       inputs: { version: $(NODE_VERSION) }
-    - download: current
-      artifact: node_modules
+    - script: npm ci
+      displayName: 'Install deps'
     - script: npm test -- --ci --coverage
       displayName: 'Unit tests'
     - task: PublishTestResults@2
@@ -87,8 +85,8 @@ stages:
     steps:
     - task: UseNode@1
       inputs: { version: $(NODE_VERSION) }
-    - download: current
-      artifact: node_modules
+    - script: npm ci
+      displayName: 'Install deps'
     - script: |
         npm prune --production
         tar -czf $(artifactName).tar.gz package.json src public node_modules
