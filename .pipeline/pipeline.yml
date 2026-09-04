@@ -23,9 +23,9 @@ stages:
   - job: Build
     displayName: 'Build app'
     steps:
-    - task: NodeTool@0
+    - task: UseNode@1
       inputs:
-        versionSpec: $(NODE_VERSION)
+        version: $(NODE_VERSION)
       displayName: 'Install Node.js'
     - script: |
         npm ci
@@ -41,8 +41,8 @@ stages:
   jobs:
   - job: Lint
     steps:
-    - task: NodeTool@0
-      inputs: { versionSpec: $(NODE_VERSION) }
+    - task: UseNode@1
+      inputs: { version: $(NODE_VERSION) }
     - download: current
       artifact: node_modules
     - script: npm run lint
@@ -50,8 +50,8 @@ stages:
 
   - job: StaticAnalysis
     steps:
-    - task: NodeTool@0
-      inputs: { versionSpec: $(NODE_VERSION) }
+    - task: UseNode@1
+      inputs: { version: $(NODE_VERSION) }
     - download: current
       artifact: node_modules
     - script: |
@@ -62,8 +62,8 @@ stages:
 
   - job: UnitTests
     steps:
-    - task: NodeTool@0
-      inputs: { versionSpec: $(NODE_VERSION) }
+    - task: UseNode@1
+      inputs: { version: $(NODE_VERSION) }
     - download: current
       artifact: node_modules
     - script: npm test -- --ci --coverage
@@ -85,8 +85,8 @@ stages:
   jobs:
   - job: Package
     steps:
-    - task: NodeTool@0
-      inputs: { versionSpec: $(NODE_VERSION) }
+    - task: UseNode@1
+      inputs: { version: $(NODE_VERSION) }
     - download: current
       artifact: node_modules
     - script: |
