@@ -1,95 +1,150 @@
 ﻿# .pipeline/pipeline.yml — fumigacion-frontend
-# Pipeline CI/CD homologado — Sistema de Control de Fumigación
+# Pipeline CI/CD homologado — Sistema de Control de Fumigación (Azure DevOps)
+
+trigger:
+  branches:
+    include:
+      - develop
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
 
 variables:
-  NODE_VERSION: "20"
-  ARTIFACT_NAME: "app-fumigacion-frontend-${CI_COMMIT_SHORT_SHA}.tar.gz"
+  NODE_VERSION: '20.x'
+  artifactName: 'app-fumigacion-frontend-$(Build.SourceVersion)'
 
 stages:
-  - compile
-  - quality_gates
-  - package
-  - deploy_dev
-  - deploy_qa
-  - deploy_prod
 
-compile:
-  stage: compile
-  image: node:${NODE_VERSION}
-  script:
-    - npm ci
-    - npm run build
-  artifacts:
-    paths:
-      - node_modules/
-    expire_in: 1h
+# ---------- COMPILE ----------
+- stage: Compile
+  displayName: 'Compile'
+  jobs:
+  - job: Build
+    displayName: 'Build app'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+      displayName: 'Install Node.js'
+    - script: |
+        npm ci
+        npm run build
+      displayName: 'npm ci && build'
+    - publish: node_modules
+      artifact: node_modules
 
-lint:
-  stage: quality_gates
-  image: node:${NODE_VERSION}
-  script:
-    - npm run lint
-  allow_failure: false
+# ---------- QUALITY GATES ----------
+- stage: QualityGates
+  displayName: 'Quality Gates'
+  dependsOn: Compile
+  jobs:
+  - job: Lint
+    steps:
+    - task: NodeTool@0
+      inputs: { versionSpec: $(NODE_VERSION) }
+    - download: current
+      artifact: node_modules
+    - script: npm run lint
+      displayName: 'Lint'
 
-static_analysis:
-  stage: quality_gates
-  image: node:${NODE_VERSION}
-  script:
-    - npx sonar-scanner
-      -Dsonar.projectKey=fumigacion-frontend
-      -Dsonar.qualitygate.wait=true
-  allow_failure: false
+  - job: StaticAnalysis
+    steps:
+    - task: NodeTool@0
+      inputs: { versionSpec: $(NODE_VERSION) }
+    - download: current
+      artifact: node_modules
+    - script: |
+        npx sonar-scanner \
+          -Dsonar.projectKey=fumigacion-frontend \
+          -Dsonar.qualitygate.wait=true
+      displayName: 'SonarQube analysis'
 
-unit_tests:
-  stage: quality_gates
-  image: node:${NODE_VERSION}
-  script:
-    - npm test -- --ci --coverage
-  coverage: '/Lines\s*:\s*(\d+\.?\d*)%/'
-  artifacts:
-    reports:
-      junit: junit.xml
-  allow_failure: false
+  - job: UnitTests
+    steps:
+    - task: NodeTool@0
+      inputs: { versionSpec: $(NODE_VERSION) }
+    - download: current
+      artifact: node_modules
+    - script: npm test -- --ci --coverage
+      displayName: 'Unit tests'
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'junit.xml'
+    - task: PublishCodeCoverageResults@2
+      condition: succeededOrFailed()
+      inputs:
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
 
-package:
-  stage: package
-  image: node:${NODE_VERSION}
-  script:
-    - npm prune --production
-    - tar -czf ${ARTIFACT_NAME} package.json src public node_modules
-  artifacts:
-    paths:
-      - ${ARTIFACT_NAME}
-    expire_in: 7d
-  needs: ["lint", "static_analysis", "unit_tests"]
+# ---------- PACKAGE ----------
+- stage: Package
+  displayName: 'Package'
+  dependsOn: QualityGates
+  jobs:
+  - job: Package
+    steps:
+    - task: NodeTool@0
+      inputs: { versionSpec: $(NODE_VERSION) }
+    - download: current
+      artifact: node_modules
+    - script: |
+        npm prune --production
+        tar -czf $(artifactName).tar.gz package.json src public node_modules
+      displayName: 'Package artifact'
+    - publish: '$(System.DefaultWorkingDirectory)/$(artifactName).tar.gz'
+      artifact: package
 
-deploy_dev:
-  stage: deploy_dev
-  script:
-    - echo "Desplegando ${ARTIFACT_NAME} en entorno DEV"
-    - ./scripts/deploy.sh dev
-  environment: { name: dev }
-  rules:
-    - if: "$CI_COMMIT_BRANCH == \"develop\""
+# ---------- DEPLOY DEV ----------
+- stage: DeployDev
+  displayName: 'Deploy DEV'
+  dependsOn: Package
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  jobs:
+  - deployment: DeployDev
+    environment: 'dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: package
+          - script: ./scripts/deploy.sh dev
+            displayName: 'Deploy to DEV'
 
-deploy_qa:
-  stage: deploy_qa
-  script:
-    - echo "Desplegando ${ARTIFACT_NAME} en entorno QA"
-    - ./scripts/deploy.sh qa
-    - npm run test:integration
-  environment: { name: qa }
-  rules:
-    - if: "$CI_COMMIT_BRANCH == \"develop\""
-  needs: ["deploy_dev"]
+# ---------- DEPLOY QA ----------
+- stage: DeployQA
+  displayName: 'Deploy QA'
+  dependsOn: DeployDev
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  jobs:
+  - deployment: DeployQA
+    environment: 'qa'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: package
+          - script: |
+              ./scripts/deploy.sh qa
+              npm run test:integration
+            displayName: 'Deploy to QA + integration tests'
 
-deploy_prod:
-  stage: deploy_prod
-  script:
-    - echo "Desplegando ${ARTIFACT_NAME} en entorno PROD"
-    - ./scripts/deploy.sh prod
-  environment: { name: prod }
-  when: manual
-  rules:
-    - if: "$CI_COMMIT_BRANCH == \"main\""
-  needs: ["deploy_qa"]
+# ---------- DEPLOY PROD ----------
+- stage: DeployProd
+  displayName: 'Deploy PROD'
+  dependsOn: DeployQA
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployProd
+    environment: 'prod'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: package
+          - script: ./scripts/deploy.sh prod
+            displayName: 'Deploy to PROD'
