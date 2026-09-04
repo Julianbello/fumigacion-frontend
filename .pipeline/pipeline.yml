@@ -43,7 +43,7 @@ stages:
       inputs: { version: $(NODE_VERSION) }
     - script: npm ci
       displayName: 'Install deps'
-    - script: ESLINT_USE_FLAT_CONFIG=false npm run lint
+    - script: npm run lint
       displayName: 'Lint'
 
   - job: StaticAnalysis
@@ -148,3 +148,4 @@ stages:
             artifact: package
           - script: ./scripts/deploy.sh prod
             displayName: 'Deploy to PROD'
+            
