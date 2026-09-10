@@ -5,6 +5,9 @@ const app = express();
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Frontend fumigación escuchando en puerto ${PORT}`));
+
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`Frontend fumigación escuchando en puerto ${PORT}`));
+}
 
 module.exports = app;
