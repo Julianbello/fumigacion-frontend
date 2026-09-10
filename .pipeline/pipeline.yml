@@ -99,6 +99,8 @@ stages:
           - download: current
             artifact: package
           - script: |
+              cd $(Pipeline.Workspace)/package
+              tar -xzf $(artifactName).tar.gz
               chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh dev
             displayName: 'Deploy to DEV'
@@ -118,6 +120,8 @@ stages:
           - download: current
             artifact: package
           - script: |
+              cd $(Pipeline.Workspace)/package
+              tar -xzf $(artifactName).tar.gz
               chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh qa
               npm run test:integration
@@ -138,6 +142,8 @@ stages:
           - download: current
             artifact: package
           - script: |
+              cd $(Pipeline.Workspace)/package
+              tar -xzf $(artifactName).tar.gz
               chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh prod
             displayName: 'Deploy to PROD'
