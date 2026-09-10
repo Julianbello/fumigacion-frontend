@@ -1,21 +1,20 @@
-﻿
-# .pipeline/pipeline.yml — fumigacion-frontend
+﻿# .pipeline/pipeline.yml — fumigacion-frontend
 # Pipeline CI/CD homologado — Sistema de Control de Fumigación (Azure DevOps)
- 
+
 trigger:
   branches:
     include:
       - main
- 
+
 pool:
   vmImage: 'ubuntu-latest'
- 
+
 variables:
   NODE_VERSION: '20.x'
   artifactName: 'app-fumigacion-frontend-$(Build.SourceVersion)'
- 
+
 stages:
- 
+
 # ---------- COMPILE ----------
 - stage: Compile
   displayName: 'Compile'
@@ -31,7 +30,7 @@ stages:
         npm ci
         npm run build
       displayName: 'npm ci && build'
- 
+
 # ---------- QUALITY GATES ----------
 - stage: QualityGates
   displayName: 'Quality Gates'
@@ -45,7 +44,7 @@ stages:
       displayName: 'Install deps'
     - script: npm run lint
       displayName: 'Lint'
- 
+
   - job: UnitTests
     steps:
     - task: UseNode@1
@@ -63,7 +62,7 @@ stages:
       condition: succeededOrFailed()
       inputs:
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
- 
+
 # ---------- PACKAGE ----------
 - stage: Package
   displayName: 'Package'
@@ -77,11 +76,11 @@ stages:
       displayName: 'Install deps'
     - script: |
         npm prune --production
-        tar -czf $(artifactName).tar.gz package.json src public node_modules scripts
+        tar -czf $(artifactName).tar.gz package.json package-lock.json src public node_modules scripts
       displayName: 'Package artifact'
     - publish: '$(System.DefaultWorkingDirectory)/$(artifactName).tar.gz'
       artifact: package
- 
+
 # ---------- DEPLOY DEV ----------
 - stage: DeployDev
   displayName: 'Deploy DEV'
@@ -99,10 +98,11 @@ stages:
           - script: |
               cd $(Pipeline.Workspace)/package
               tar -xzf $(artifactName).tar.gz
+              sed -i '1s/^\xEF\xBB\xBF//' ./scripts/deploy.sh
               chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh dev
             displayName: 'Deploy to DEV'
- 
+
 # ---------- DEPLOY QA ----------
 - stage: DeployQA
   displayName: 'Deploy QA'
@@ -117,14 +117,18 @@ stages:
           steps:
           - download: current
             artifact: package
+          - task: UseNode@1
+            inputs: { version: $(NODE_VERSION) }
           - script: |
               cd $(Pipeline.Workspace)/package
               tar -xzf $(artifactName).tar.gz
+              sed -i '1s/^\xEF\xBB\xBF//' ./scripts/deploy.sh
               chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh qa
+              npm ci
               npm run test:integration
             displayName: 'Deploy to QA + integration tests'
- 
+
 # ---------- DEPLOY PROD ----------
 - stage: DeployProd
   displayName: 'Deploy PROD'
@@ -142,6 +146,7 @@ stages:
           - script: |
               cd $(Pipeline.Workspace)/package
               tar -xzf $(artifactName).tar.gz
+              sed -i '1s/^\xEF\xBB\xBF//' ./scripts/deploy.sh
               chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh prod
             displayName: 'Deploy to PROD'
