@@ -77,7 +77,7 @@ stages:
       displayName: 'Install deps'
     - script: |
         npm prune --production
-        tar -czf $(artifactName).tar.gz package.json src public node_modules
+        tar -czf $(artifactName).tar.gz package.json src public node_modules scripts
       displayName: 'Package artifact'
     - publish: '$(System.DefaultWorkingDirectory)/$(artifactName).tar.gz'
       artifact: package
@@ -98,7 +98,9 @@ stages:
           steps:
           - download: current
             artifact: package
-          - script: ./scripts/deploy.sh dev
+          - script: |
+              chmod +x ./scripts/deploy.sh
+              ./scripts/deploy.sh dev
             displayName: 'Deploy to DEV'
 
 # ---------- DEPLOY QA ----------
@@ -116,6 +118,7 @@ stages:
           - download: current
             artifact: package
           - script: |
+              chmod +x ./scripts/deploy.sh
               ./scripts/deploy.sh qa
               npm run test:integration
             displayName: 'Deploy to QA + integration tests'
@@ -134,5 +137,7 @@ stages:
           steps:
           - download: current
             artifact: package
-          - script: ./scripts/deploy.sh prod
+          - script: |
+              chmod +x ./scripts/deploy.sh
+              ./scripts/deploy.sh prod
             displayName: 'Deploy to PROD'
