@@ -76,7 +76,7 @@ stages:
       displayName: 'Install deps'
     - script: |
         npm prune --production
-        tar -czf $(artifactName).tar.gz package.json package-lock.json src public node_modules scripts
+        tar -czf $(artifactName).tar.gz package.json package-lock.json src public node_modules scripts tests
       displayName: 'Package artifact'
     - publish: '$(System.DefaultWorkingDirectory)/$(artifactName).tar.gz'
       artifact: package
