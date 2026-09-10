@@ -83,6 +83,8 @@ stages:
       artifact: package
 
 # ---------- DEPLOY DEV ----------
+# Depende directamente de Package (no de otro deploy) para que su condición
+# de rama se evalúe de forma independiente y no herede un "Skipped".
 - stage: DeployDev
   displayName: 'Deploy DEV'
   dependsOn: Package
@@ -102,7 +104,7 @@ stages:
 # ---------- DEPLOY QA ----------
 - stage: DeployQA
   displayName: 'Deploy QA'
-  dependsOn: DeployDev
+  dependsOn: Package
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
   jobs:
   - deployment: DeployQA
@@ -121,7 +123,7 @@ stages:
 # ---------- DEPLOY PROD ----------
 - stage: DeployProd
   displayName: 'Deploy PROD'
-  dependsOn: DeployQA
+  dependsOn: Package
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
   jobs:
   - deployment: DeployProd
