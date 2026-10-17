@@ -1,5 +1,6 @@
 ﻿# .pipeline/pipeline.yml — fumigacion-frontend
-# Pipeline CI/CD homologado — Sistema de Control de Fumigación (Azure DevOps)
+# Pipeline CI/CD — Sistema de Control de Fumigación (Azure DevOps)
+# Despliegue en Azure App Service (Linux, Node.js)
 
 trigger:
   branches:
@@ -12,6 +13,11 @@ pool:
 variables:
   NODE_VERSION: '20.x'
   artifactName: 'app-fumigacion-frontend-$(Build.SourceVersion)'
+  # --- CAMBIA ESTOS 4 VALORES ---
+  AZURE_SERVICE_CONNECTION: 'azure-fumigacion'
+  WEBAPP_DEV: 'fumigacion-frontend-julianbello'
+  WEBAPP_QA: 'fumigacion-frontend-julianbello'
+  WEBAPP_PROD: 'fumigacion-frontend-julianbello'
 
 stages:
 
@@ -64,21 +70,19 @@ stages:
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
 
 # ---------- PACKAGE ----------
+# App Service instala las dependencias al desplegar
+# (SCM_DO_BUILD_DURING_DEPLOYMENT=true), por eso el ZIP no lleva node_modules.
 - stage: Package
   displayName: 'Package'
   dependsOn: QualityGates
   jobs:
   - job: Package
     steps:
-    - task: UseNode@1
-      inputs: { version: $(NODE_VERSION) }
-    - script: npm ci
-      displayName: 'Install deps'
     - script: |
-        npm prune --production
-        tar -czf $(artifactName).tar.gz package.json package-lock.json src public node_modules scripts tests
-      displayName: 'Package artifact'
-    - publish: '$(System.DefaultWorkingDirectory)/$(artifactName).tar.gz'
+        zip -qr "$(Build.ArtifactStagingDirectory)/$(artifactName).zip" package.json package-lock.json src public
+        ls -lh "$(Build.ArtifactStagingDirectory)"
+      displayName: 'Package artifact (zip)'
+    - publish: '$(Build.ArtifactStagingDirectory)/$(artifactName).zip'
       artifact: package
 
 # ---------- DEPLOY DEV ----------
@@ -93,15 +97,14 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: package
-          - script: |
-              cd $(Pipeline.Workspace)/package
-              tar -xzf $(artifactName).tar.gz
-              sed -i '1s/^\xEF\xBB\xBF//' ./scripts/deploy.sh
-              chmod +x ./scripts/deploy.sh
-              ./scripts/deploy.sh dev
-            displayName: 'Deploy to DEV'
+          - task: AzureWebApp@1
+            displayName: 'Deploy to App Service (DEV)'
+            inputs:
+              azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
+              appType: 'webAppLinux'
+              appName: '$(WEBAPP_DEV)'
+              runtimeStack: 'NODE|22-lts'
+              package: '$(Pipeline.Workspace)/package/*.zip'
 
 # ---------- DEPLOY QA ----------
 - stage: DeployQA
@@ -115,19 +118,22 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: package
+          - task: AzureWebApp@1
+            displayName: 'Deploy to App Service (QA)'
+            inputs:
+              azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
+              appType: 'webAppLinux'
+              appName: '$(WEBAPP_QA)'
+              runtimeStack: 'NODE|22-lts'
+              package: '$(Pipeline.Workspace)/package/*.zip'
+          - checkout: self
           - task: UseNode@1
             inputs: { version: $(NODE_VERSION) }
           - script: |
-              cd $(Pipeline.Workspace)/package
-              tar -xzf $(artifactName).tar.gz
-              sed -i '1s/^\xEF\xBB\xBF//' ./scripts/deploy.sh
-              chmod +x ./scripts/deploy.sh
-              ./scripts/deploy.sh qa
               npm ci
               npm run test:integration
-            displayName: 'Deploy to QA + integration tests'
+            workingDirectory: '$(Build.SourcesDirectory)'
+            displayName: 'Integration tests'
 
 # ---------- DEPLOY PROD ----------
 - stage: DeployProd
@@ -141,12 +147,11 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: package
-          - script: |
-              cd $(Pipeline.Workspace)/package
-              tar -xzf $(artifactName).tar.gz
-              sed -i '1s/^\xEF\xBB\xBF//' ./scripts/deploy.sh
-              chmod +x ./scripts/deploy.sh
-              ./scripts/deploy.sh prod
-            displayName: 'Deploy to PROD'
+          - task: AzureWebApp@1
+            displayName: 'Deploy to App Service (PROD)'
+            inputs:
+              azureSubscription: '$(AZURE_SERVICE_CONNECTION)'
+              appType: 'webAppLinux'
+              appName: '$(WEBAPP_PROD)'
+              runtimeStack: 'NODE|22-lts'
+              package: '$(Pipeline.Workspace)/package/*.zip'
