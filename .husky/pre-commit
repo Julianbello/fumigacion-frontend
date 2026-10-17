@@ -1,2 +1,4 @@
+echo "Husky: iniciando verificaciones..."
 npm run lint
 npm test
+echo "Husky: todo se ejecuto bien, commit permitido"
