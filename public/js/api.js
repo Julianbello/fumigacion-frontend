@@ -1,4 +1,4 @@
-﻿const API_BASE = window.API_BASE_URL || "https://fumigacion-backend-bien.vercel.app/api";
+﻿const API_BASE = window.API_BASE_URL || "https://fumigacion-backend-julianbello.azurewebsites.net/api";
 
 function authHeaders() {
   const token = localStorage.getItem("token");
