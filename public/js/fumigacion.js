@@ -3,7 +3,7 @@
   try {
     const productos = await obtenerInventario();
     select.innerHTML = '<option value="">-- Selecciona un producto --</option>' +
-      productos.map(p => `<option value="${p._id}">${p.nombre} (Stock: ${p.stockLitros} L)</option>`).join("");
+      productos.map(p => `<option value="${escapeHtml(p._id)}">${escapeHtml(p.nombre)} (Stock: ${escapeHtml(p.stockLitros)} L)</option>`).join("");
   } catch (err) {
     select.innerHTML = '<option value="">Error al cargar productos</option>';
   }

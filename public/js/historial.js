@@ -11,15 +11,15 @@
       return `
         <tr>
           <td>${new Date(f.fecha).toLocaleString("es-CO")}</td>
-          <td>${prodNombre}</td>
-          <td><span class="badge">${f.categoria}</span></td>
+          <td>${escapeHtml(prodNombre)}</td>
+          <td><span class="badge">${escapeHtml(f.categoria)}</span></td>
           <td>${f.litrosAplicados} L</td>
-          <td>${f.responsable}</td>
+          <td>${escapeHtml(f.responsable)}</td>
           <td>${f.stockRestante} L</td>
         </tr>
       `;
     }).join("");
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6">Error cargando historial: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6">Error cargando historial: ${escapeHtml(err.message)}</td></tr>`;
   }
 });

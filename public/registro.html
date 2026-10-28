@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Control de Fumigación — Registro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="login-page">
+  <div class="login-card">
+    <div class="icon-wrap">🐛</div>
+    <h1>Crear cuenta</h1>
+    <p class="subtitle">Regístrate para usar el sistema</p>
+    <form id="registroForm">
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <input id="username" placeholder="tu_usuario" minlength="3" maxlength="30" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Contraseña (mínimo 8 caracteres)</label>
+        <input id="password" type="password" placeholder="********" minlength="8" maxlength="72" required />
+      </div>
+      <div class="form-group">
+        <label for="confirmar">Repite la contraseña</label>
+        <input id="confirmar" type="password" placeholder="********" minlength="8" maxlength="72" required />
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;">Crear cuenta</button>
+    </form>
+    <p id="mensaje" class="mensaje"></p>
+    <p style="text-align:center;margin-top:16px;font-size:14px;">
+      ¿Ya tienes cuenta? <a href="login.html">Ingresa</a>
+    </p>
+  </div>
+  <script src="js/api.js"></script>
+  <script src="js/registro.js"></script>
+</body>
+</html>
