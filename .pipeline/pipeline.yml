@@ -19,6 +19,11 @@ variables:
   WEBAPP_QA: 'fumigacion-frontend-julianbello'
   WEBAPP_PROD: 'fumigacion-frontend-julianbello'
   SITE_URL: 'https://fumigacion-frontend-julianbello.azurewebsites.net'
+  # --- SonarCloud: déjalo en 'false' hasta tenerlo configurado ---
+  RUN_SONAR: 'true'
+  SONAR_SERVICE_CONNECTION: 'sonarcloud-fumigacion'
+  SONAR_ORGANIZATION: 'julianbello'
+  SONAR_PROJECT_KEY: 'Julianbello_fumigacion-frontend'
 
 stages:
 
@@ -69,6 +74,37 @@ stages:
       condition: succeededOrFailed()
       inputs:
         summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+
+  - ${{ if eq(variables['RUN_SONAR'], 'true') }}:
+    - job: SonarCloud
+      displayName: 'Análisis de código (SonarCloud)'
+      steps:
+      - checkout: self
+        fetchDepth: 0
+      - task: UseNode@1
+        inputs: { version: $(NODE_VERSION) }
+      - task: SonarCloudPrepare@4
+        displayName: 'SonarCloud: preparar análisis'
+        inputs:
+          SonarCloud: '$(SONAR_SERVICE_CONNECTION)'
+          organization: '$(SONAR_ORGANIZATION)'
+          scannerMode: 'cli'
+          configMode: 'manual'
+          cliProjectKey: '$(SONAR_PROJECT_KEY)'
+          cliProjectName: 'fumigacion-frontend'
+          cliSources: 'src,public'
+      - script: npm ci
+        displayName: 'Install deps'
+      - script: npm test -- --ci --coverage
+        displayName: 'Pruebas con cobertura (para SonarCloud)'
+      - task: SonarCloudAnalyze@4
+        displayName: 'SonarCloud: analizar código'
+        inputs:
+          jdkversion: 'JAVA_HOME_17_X64'
+      - task: SonarCloudPublish@4
+        displayName: 'SonarCloud: publicar resultado del Quality Gate'
+        inputs:
+          pollingTimeoutSec: '300'
 
 # ---------- PACKAGE ----------
 # App Service instala las dependencias al desplegar
