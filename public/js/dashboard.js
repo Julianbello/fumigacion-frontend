@@ -14,18 +14,7 @@
       tbody.innerHTML = "<tr><td colspan=\"5\">Aún no hay fumigaciones registradas.</td></tr>";
       return;
     }
-    tbody.innerHTML = ultimas.map(f => {
-      const prodNombre = typeof f.productoId === 'object' ? f.productoId?.nombre : (f.productoNombre || 'N/A');
-      return `
-        <tr>
-          <td>${new Date(f.fecha).toLocaleString("es-CO")}</td>
-          <td>${escapeHtml(prodNombre)}</td>
-          <td><span class="badge">${escapeHtml(f.categoria)}</span></td>
-          <td>${f.litrosAplicados} L</td>
-          <td>${escapeHtml(f.responsable)}</td>
-        </tr>
-      `;
-    }).join("");
+    tbody.innerHTML = ultimas.map(f => filaFumigacion(f, false)).join("");
   } catch (err) {
     document.getElementById("tablaUltimas").innerHTML =
       `<tr><td colspan="5">Error cargando datos: ${escapeHtml(err.message)}</td></tr>`;

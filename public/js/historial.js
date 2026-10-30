@@ -6,19 +6,7 @@
       tbody.innerHTML = "<tr><td colspan=\"6\">Aún no hay fumigaciones registradas.</td></tr>";
       return;
     }
-    tbody.innerHTML = fumigaciones.slice().reverse().map(f => {
-      const prodNombre = typeof f.productoId === 'object' ? f.productoId?.nombre : (f.productoNombre || 'N/A');
-      return `
-        <tr>
-          <td>${new Date(f.fecha).toLocaleString("es-CO")}</td>
-          <td>${escapeHtml(prodNombre)}</td>
-          <td><span class="badge">${escapeHtml(f.categoria)}</span></td>
-          <td>${f.litrosAplicados} L</td>
-          <td>${escapeHtml(f.responsable)}</td>
-          <td>${f.stockRestante} L</td>
-        </tr>
-      `;
-    }).join("");
+    tbody.innerHTML = fumigaciones.slice().reverse().map(f => filaFumigacion(f, true)).join("");
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="6">Error cargando historial: ${escapeHtml(err.message)}</td></tr>`;
   }

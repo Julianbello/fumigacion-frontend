@@ -8,9 +8,7 @@
 
   try {
     const { token, role } = await login(username, password);
-    localStorage.setItem("token", token);
-    localStorage.setItem("role", role);
-    localStorage.setItem("username", username);
+    guardarSesion(token, role, username);
     window.location.href = "dashboard.html";
   } catch (err) {
     mensaje.classList.add("error");
