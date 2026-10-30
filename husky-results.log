@@ -212,3 +212,29 @@ Ran all test suites.
 Tests: OK
 RESULTADO: Husky se ejecuto bien, commit permitido
 
+===== Husky pre-commit: Fri, Oct 30, 2026 12:01:11 AM =====
+[1/2] Lint...
+
+> fumigacion-frontend@1.0.0 lint
+> eslint src
+
+Lint: OK
+[2/2] Tests...
+
+> fumigacion-frontend@1.0.0 test
+> jest --testPathIgnorePatterns=tests/integration
+
+PASS tests/api.test.js
+PASS tests/api-client.test.js
+PASS tests/api.modulo.test.js
+PASS tests/Server.test.js (5.44 s)
+PASS tests/paginas.test.js
+
+Test Suites: 5 passed, 5 total
+Tests:       60 passed, 60 total
+Snapshots:   0 total
+Time:        10.433 s
+Ran all test suites.
+Tests: OK
+RESULTADO: Husky se ejecuto bien, commit permitido
+
