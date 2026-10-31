@@ -15,26 +15,31 @@
     ["historial.html", "🗒️ Historial"]
   ];
 
-  // Dibuja el menú lateral y la barra superior, que son iguales en todas las páginas.
+  // Arma la estructura común de todas las páginas (menú lateral y barra superior)
+  // alrededor del <main class="content"> que trae cada una.
   function dibujarEstructura() {
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) {
-      sidebar.innerHTML =
-        '<div class="sidebar-brand"><span class="icon">🐛</span> Fumigación</div>' +
-        "<nav>" + MENU.map(([href, texto]) => `<a href="${href}">${texto}</a>`).join("") + "</nav>";
-    }
+    const contenido = document.querySelector("main.content");
+    if (!contenido) return;
 
-    const topbar = document.getElementById("topbar");
-    if (topbar) {
-      topbar.innerHTML =
-        "<h1></h1>" +
-        '<div class="user-box">' +
-        '<span id="topbarUserName">Cargando...</span>' +
-        '<div class="avatar" id="topbarUserInitial">?</div>' +
-        '<button class="btn-logout" id="logoutBtn">Salir</button>' +
-        "</div>";
-      topbar.querySelector("h1").textContent = topbar.dataset.titulo || "";
-    }
+    const estructura = document.createElement("div");
+    estructura.className = "app-shell";
+    estructura.innerHTML =
+      '<aside class="sidebar">' +
+      '<div class="sidebar-brand"><span class="icon">🐛</span> Fumigación</div>' +
+      "<nav>" + MENU.map(([href, texto]) => `<a href="${href}">${texto}</a>`).join("") + "</nav>" +
+      "</aside>" +
+      '<div class="main-area">' +
+      '<header class="topbar"><h1></h1>' +
+      '<div class="user-box">' +
+      '<span id="topbarUserName">Cargando...</span>' +
+      '<div class="avatar" id="topbarUserInitial">?</div>' +
+      '<button class="btn-logout" id="logoutBtn">Salir</button>' +
+      "</div></header>" +
+      "</div>";
+
+    estructura.querySelector("h1").textContent = document.body.dataset.titulo || "";
+    estructura.querySelector(".main-area").appendChild(contenido);
+    document.body.prepend(estructura);
   }
 
   document.addEventListener("DOMContentLoaded", () => {

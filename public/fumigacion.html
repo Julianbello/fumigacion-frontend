@@ -5,51 +5,30 @@
   <title>Registrar Fumigación — Control de Fumigación</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="sidebar-brand"><span class="icon">🐛</span> Fumigación</div>
-      <nav>
-        <a href="dashboard.html">📊 Dashboard</a>
-        <a href="fumigacion.html">🧪 Registrar Fumigación</a>
-        <a href="inventario.html">📦 Inventario</a>
-        <a href="historial.html">🗒️ Historial</a>
-      </nav>
-    </aside>
-    <div class="main-area">
-      <header class="topbar">
-        <h1>Registrar Fumigación</h1>
-        <div class="user-box">
-          <span id="topbarUserName">Cargando...</span>
-          <div class="avatar" id="topbarUserInitial">?</div>
-          <button class="btn-logout" id="logoutBtn">Salir</button>
+<body data-titulo="Registrar Fumigación">
+  <main class="content">
+    <div class="card" style="max-width:480px;">
+      <h2>Nueva ejecución de fumigación</h2>
+      <form id="fumigacionForm">
+        <div class="form-group">
+          <label for="productoId">Seleccionar Producto</label>
+          <select id="productoId" required>
+            <option value="">Cargando productos...</option>
+          </select>
         </div>
-      </header>
-      <main class="content">
-        <div class="card" style="max-width:480px;">
-          <h2>Nueva ejecución de fumigación</h2>
-          <form id="fumigacionForm">
-            <div class="form-group">
-              <label for="productoId">Seleccionar Producto</label>
-              <select id="productoId" required>
-                <option value="">Cargando productos...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="litros">Litros aplicados</label>
-              <input id="litros" type="number" step="0.1" placeholder="Ej. 2.5" required />
-            </div>
-            <div class="form-group">
-              <label for="categoria">Categoría de plaga</label>
-              <input id="categoria" placeholder="Ej. polvoso, trips, velloso" required />
-            </div>
-            <button type="submit" class="btn-primary">Registrar</button>
-          </form>
-          <p id="resultado" class="mensaje"></p>
+        <div class="form-group">
+          <label for="litros">Litros aplicados</label>
+          <input id="litros" type="number" step="0.1" placeholder="Ej. 2.5" required />
         </div>
-      </main>
+        <div class="form-group">
+          <label for="categoria">Categoría de plaga</label>
+          <input id="categoria" placeholder="Ej. polvoso, trips, velloso" required />
+        </div>
+        <button type="submit" class="btn-primary">Registrar</button>
+      </form>
+      <p id="resultado" class="mensaje"></p>
     </div>
-  </div>
+  </main>
   <script src="js/api.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/fumigacion.js"></script>
